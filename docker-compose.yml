@@ -4,16 +4,24 @@ services:
     build: ./backend
     container_name: todo-backend
     ports:
-      - "80:80"
+      - "80:80"  # Backend diakses di port 80
     depends_on:
       - db
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/tododb
+    networks:
+      - app-network
+
   frontend:
     build: ./frontend
     container_name: todo-frontend
     ports:
-      - "3000:3000"
+      - "8081:80"  # Frontend diakses di port 3000
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
   db:
     image: postgres
     container_name: todo-db
@@ -23,9 +31,15 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: tododb
     ports:
-      - "5432:5432"
+      - "5432:5432"  # Port database diakses di 5432
     volumes:
       - pgdata:/var/lib/postgresql/data
+    networks:
+      - app-network
 
 volumes:
   pgdata:
+
+networks:
+  app-network:
+    driver: bridge
