@@ -10,4 +10,8 @@ COPY ./ /backend/
 
 WORKDIR /backend/app
 
+RUN apt-get update && apt-get install -y netcat-openbsd
+
+ENTRYPOINT ["sh", "/backend/wait-for-db.sh"]
+
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
