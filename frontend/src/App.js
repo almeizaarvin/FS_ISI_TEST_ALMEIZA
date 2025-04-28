@@ -57,9 +57,15 @@ function App() {
   }
 
   const editTask = (task) => {
+    setIsEditing(true)
     setEditingTask(task)
     setNewTitle(task.title)
-    setIsEditing(true)
+  }
+
+  const cancelEdit = () => {
+    setIsEditing(false)
+    setNewTitle("")
+    setEditingTask(null)
   }
 
   const updateTask = () => {
@@ -75,6 +81,7 @@ function App() {
     }).then(() => {
       setIsEditing(false)
       setNewTitle("")
+      setEditingTask(null)
       fetchTasks()
     }).catch(console.error)
   }
@@ -99,52 +106,44 @@ function App() {
         <h1 className="text-3xl font-bold">Task List</h1>
       </header>
 
+      {/* Input Section */}
       <section className="mb-12">
         <div className="flex flex-col gap-4">
           <input
             type="text"
             placeholder="New Task Title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            value={isEditing ? newTitle : title}
+            onChange={(e) => isEditing ? setNewTitle(e.target.value) : setTitle(e.target.value)}
             className="border rounded-md p-2 w-full focus:ring-2 focus:ring-blue-400"
           />
-          <button
-            onClick={addTask}
-            className="bg-blue-500 hover:bg-blue-600 text-white rounded-md py-2"
-          >
-            Add Task
-          </button>
-        </div>
-      </section>
 
-      {isEditing && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-20">
-          <div className="bg-white p-6 rounded-md shadow-md w-72">
-            <h2 className="text-lg font-semibold mb-4">Edit Task</h2>
-            <input
-              type="text"
-              value={newTitle}
-              onChange={(e) => setNewTitle(e.target.value)}
-              className="border rounded-md p-2 w-full mb-4 focus:ring-2 focus:ring-blue-400"
-            />
-            <div className="flex justify-end gap-2">
+          {!isEditing ? (
+            <button
+              onClick={addTask}
+              className="bg-blue-500 hover:bg-blue-600 text-white rounded-md py-1.5 px-4 text-sm font-semibold"
+            >
+              Add Task
+            </button>
+          ) : (
+            <div className="flex justify-center gap-4">
               <button
-                onClick={() => setIsEditing(false)}
-                className="bg-gray-300 hover:bg-gray-400 text-black rounded-md px-4 py-2"
+                onClick={updateTask}
+                className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold rounded-md px-4 py-2"
+              >
+                Update Task
+              </button>
+              <button
+                onClick={cancelEdit}
+                className="bg-red-500 hover:bg-red-600 text-white rounded-md px-4 py-2"
               >
                 Cancel
               </button>
-              <button
-                onClick={updateTask}
-                className="bg-blue-500 hover:bg-blue-600 text-white rounded-md px-4 py-2"
-              >
-                Save
-              </button>
             </div>
-          </div>
+          )}
         </div>
-      )}
+      </section>
 
+      {/* Ongoing Tasks */}
       <section className="mb-10">
         <h2 className="text-xl font-semibold mb-4">Ongoing</h2>
         <div className="space-y-4">
@@ -162,7 +161,7 @@ function App() {
                   <X className="w-4 h-4 text-red-500" />
                 </button>
                 <button onClick={() => completeTask(task)} className="border rounded-full p-1 hover:bg-gray-200">
-                  {/* Empty circle */}
+                  <div className="w-4 h-4 rounded-full border-2 border-gray-400" />
                 </button>
               </div>
             </div>
@@ -170,6 +169,7 @@ function App() {
         </div>
       </section>
 
+      {/* Completed Tasks */}
       <section>
         <h2 className="text-xl font-semibold mb-4">Completed</h2>
         <div className="space-y-4">
