@@ -6,7 +6,7 @@ Fullstack Engineer Assessment Test
 ### All of the services containerized in Dockerfile. To run all of the app, just run docker compose 
 
 ```bash
-git clone <repo-ini>
-cd <nama-folder-repo>
+git clone https://github.com/almeizaarvin/FS_ISI_TEST_ALMEIZA.git
+cd FS_ISI_TEST_ALMEIZA
 docker-compose up --build
 
