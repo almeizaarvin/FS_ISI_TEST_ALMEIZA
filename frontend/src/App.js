@@ -5,21 +5,23 @@ import { Pencil, X, Check } from "lucide-react"
 import "./App.css"
 
 function App() {
-  const [tasks, setTasks] = useState([])  
-  const [title, setTitle] = useState("") 
-
+  const [tasks, setTasks] = useState([])
+  const [title, setTitle] = useState("")
 
   useEffect(() => {
+    fetchTasks()
+  }, [])
+
+  const fetchTasks = () => {
     fetch("http://localhost:80/tasks")
       .then((response) => response.json())
       .then((data) => {
-        setTasks(data) 
+        setTasks(data)
       })
       .catch((error) => {
         console.error("Error fetching tasks:", error)
       })
-  }, []) 
-
+  }
 
   const addTask = () => {
     if (title.trim() === "") return
@@ -27,9 +29,8 @@ function App() {
     const newTask = {
       title: title,
       status: "pending",
-      created_at: new Date().toISOString(), 
+      created_at: new Date().toISOString(),
     }
-
 
     fetch("http://localhost:80/tasks", {
       method: "POST",
@@ -39,9 +40,9 @@ function App() {
       body: JSON.stringify(newTask),
     })
       .then((response) => response.json())
-      .then((data) => {
-        setTasks([...tasks, data]) 
+      .then(() => {
         setTitle("")
+        fetchTasks()
       })
       .catch((error) => {
         console.error("Error adding task:", error)
@@ -49,9 +50,41 @@ function App() {
   }
 
   const deleteTask = (id) => {
+    fetch(`http://localhost:80/tasks/${id}`, {
+      method: "DELETE",
+    })
+      .then(() => {
+        fetchTasks()
+      })
+      .catch((error) => {
+        console.error("Error deleting task:", error)
+      })
   }
 
-  const toggleTaskStatus = (id) => {
+  const completeTask = (task) => {
+    fetch(`http://localhost:80/tasks/${task.id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title: task.title,
+        status: "completed",
+        created_at: task.created_at
+      }),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`)
+        }
+        return response.json()
+      })
+      .then(() => {
+        fetchTasks()
+      })
+      .catch((error) => {
+        console.error("Error updating task:", error)
+      })
   }
 
   const formatDate = (dateString) => {
@@ -65,8 +98,8 @@ function App() {
     return `${day} ${month} ${year} ${hours}:${minutes}`
   }
 
-  const ongoingTasks = tasks.filter((task) => !task.completed)
-  const completedTasks = tasks.filter((task) => task.completed)
+  const ongoingTasks = tasks.filter((task) => task.status === "pending")
+  const completedTasks = tasks.filter((task) => task.status === "completed")
 
   return (
     <div className="max-w-md mx-auto p-4">
@@ -102,8 +135,11 @@ function App() {
               <button onClick={() => deleteTask(task.id)} className="bg-white rounded-full p-1">
                 <X className="h-4 w-4" />
               </button>
-              <button onClick={() => toggleTaskStatus(task.id)} className="bg-white rounded-full p-1">
-                <Check className="h-4 w-4" />
+              <button
+                onClick={() => completeTask(task)}
+                className="bg-white rounded-full p-1 border border-gray-400 w-6 h-6 flex items-center justify-center"
+              >
+                {/* for not completed */}
               </button>
             </div>
           </div>
@@ -116,7 +152,7 @@ function App() {
           <div key={task.id} className="bg-gray-300 rounded p-3 mb-2 flex justify-between items-center">
             <div>
               <div className="flex items-center">
-                <span>{task.title}</span>
+                <span className="line-through">{task.title}</span>
                 <Pencil className="h-4 w-4 ml-2" />
               </div>
               <div className="text-xs text-gray-600">{formatDate(task.created_at)}</div>
@@ -125,8 +161,11 @@ function App() {
               <button onClick={() => deleteTask(task.id)} className="bg-white rounded-full p-1">
                 <X className="h-4 w-4" />
               </button>
-              <button onClick={() => toggleTaskStatus(task.id)} className="bg-white rounded-full p-1">
-                <Check className="h-4 w-4" />
+              <button
+                onClick={() => completeTask(task)}
+                className="bg-white rounded-full p-1 border border-gray-400 w-6 h-6 flex items-center justify-center"
+              >
+                <Check className="h-4 w-4 text-green-500" />
               </button>
             </div>
           </div>
